@@ -26,7 +26,7 @@ public class Flat {
     long flatNo;
 
     @OneToMany(mappedBy = "flat")
-    @JsonIgnore
+        @JsonIgnore
     List<Vehicle> vehicles;
 
 }

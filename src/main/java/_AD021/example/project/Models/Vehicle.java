@@ -25,7 +25,6 @@ public class Vehicle {
 
     @OneToOne
     @JoinColumn(name = "parking_slot_id")
-    @JsonIgnore
     ParkingSlot parkingSlot;
 
 
