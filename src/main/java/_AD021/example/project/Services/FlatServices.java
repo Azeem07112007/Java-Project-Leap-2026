@@ -1,7 +1,6 @@
 package _AD021.example.project.Services;
 import _AD021.example.project.Models.Flat;
 import _AD021.example.project.Repository.FlatRepository;
-import jakarta.persistence.Id;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

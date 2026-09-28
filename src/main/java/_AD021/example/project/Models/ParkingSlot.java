@@ -1,26 +1,22 @@
 package _AD021.example.project.Models;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class ParkingSlot {
+
     @Id
     @GeneratedValue
+    private Long id;
 
-    long Id;
-    int laneNo;
-    String name;
-    int amount;
-    boolean status;
-
-    @OneToOne(mappedBy = "parkingSlot")
-    Vehicle vehicle;
-
-
+    private int laneNo;
+    private String name;
+    private int amount;
+    private boolean status;
 }

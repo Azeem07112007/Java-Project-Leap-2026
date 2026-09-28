@@ -13,7 +13,6 @@ import java.util.List;
 public class ParkingSlotServices {
     @Autowired
     ParkingSlotRepository parkingSlotRepository;
-
     @Autowired
     VehicleRepository vehicleRepository;
 
@@ -22,6 +21,7 @@ public class ParkingSlotServices {
     }
 
     public ParkingSlot addslot(ParkingSlot parkingSlot) {
+        parkingSlot.setStatus(false);
         return parkingSlotRepository.save(parkingSlot);
     }
 
@@ -31,9 +31,9 @@ public class ParkingSlotServices {
     }
 
     public ParkingSlot updateSlot(ParkingSlot parkingSlot) {
-
         ParkingSlot existingSlot =
-                parkingSlotRepository.findById(parkingSlot.getId()).orElseThrow(()->new RuntimeException("Parking slot not found"));
+                parkingSlotRepository.findById(parkingSlot.getId())
+                        .orElseThrow(() -> new RuntimeException("Parking slot not found"));
         existingSlot.setLaneNo(parkingSlot.getLaneNo());
         existingSlot.setName(parkingSlot.getName());
         existingSlot.setAmount(parkingSlot.getAmount());
@@ -43,49 +43,60 @@ public class ParkingSlotServices {
     }
 
     public void deleteSlot(long id) {
-
-        if(!parkingSlotRepository.existsById(id)) {
+        if (!parkingSlotRepository.existsById(id)) {
             throw new RuntimeException("Parking slot not found");
         }
 
         parkingSlotRepository.deleteById(id);
     }
 
-    public List<ParkingSlot>getAvailableSlots() {
+    public List<ParkingSlot> getAvailableSlots() {
 
-        return parkingSlotRepository.findAll().stream().filter(slot -> !slot.isStatus()).toList();
+        return parkingSlotRepository.findAll().stream()
+                .filter(slot -> !slot.isStatus()).toList();
     }
 
-    public Vehicle assignSlot(long vehicleId,long slotId) {
+    public Vehicle assignSlot(long vehicleId, long slotId) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+                        .orElseThrow(() ->new RuntimeException("Vehicle not found"));
 
-        ParkingSlot slot = parkingSlotRepository.findById(slotId)
-                .orElseThrow(() ->new RuntimeException("Parking slot not found"));
+        ParkingSlot slot =
+                parkingSlotRepository.findById(slotId)
+                        .orElseThrow(() -> new RuntimeException("Parking slot not found"));
 
         if (slot.isStatus()) {
             throw new RuntimeException("Parking slot is already occupied");
         }
 
+        if (vehicle.getParkingSlot() != null) {
+            throw new RuntimeException("Vehicle already has a parking slot");
+        }
+
         vehicle.setParkingSlot(slot);
+
         slot.setStatus(true);
+
+        vehicleRepository.save(vehicle);
         parkingSlotRepository.save(slot);
-        return vehicleRepository.save(vehicle);
+
+        return vehicle;
     }
 
-    public void releaseSlot(long vehicleId){
-        Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
-        ParkingSlot slot = vehicle.getParkingSlot();
+    public void releaseSlot(long vehicleId) {
+
+        Vehicle vehicle =
+                vehicleRepository.findById(vehicleId)
+                        .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+
+        ParkingSlot slot =vehicle.getParkingSlot();
 
         if (slot == null) {
-            throw new RuntimeException(
-                    "Vehicle is not parked"
-            );
+            throw new RuntimeException("Vehicle is not parked");
         }
-        slot.setStatus(false);
+
         vehicle.setParkingSlot(null);
-        parkingSlotRepository.save(slot);
+        slot.setStatus(false);
         vehicleRepository.save(vehicle);
+        parkingSlotRepository.save(slot);
     }
 }
